@@ -6,28 +6,30 @@ class CustomControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        BccmPlayerView(
-          BccmPlayerController.primary,
-          config: BccmPlayerViewConfig(
-            controlsConfig: BccmPlayerControlsConfig(
-              customBuilder: (context) => const MyControls(),
+    return Scaffold(
+      body: ListView(
+        children: [
+          BccmPlayerView(
+            BccmPlayerController.primary,
+            config: BccmPlayerViewConfig(
+              controlsConfig: BccmPlayerControlsConfig(
+                customBuilder: (context) => const MyControls(),
+              ),
             ),
           ),
-        ),
-        ElevatedButton(
-            onPressed: () {
-              BccmPlayerController.primary.replaceCurrentMediaItem(
-                MediaItem(
-                  url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/adv_dv_atmos/main.m3u8',
-                  mimeType: 'application/x-mpegURL',
-                  metadata: MediaMetadata(title: 'Apple advanced (HLS/HDR)'),
-                ),
-              );
-            },
-            child: const Text('Play something'))
-      ],
+          ElevatedButton(
+              onPressed: () {
+                BccmPlayerController.primary.replaceCurrentMediaItem(
+                  MediaItem(
+                    url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/adv_dv_atmos/main.m3u8',
+                    mimeType: 'application/x-mpegURL',
+                    metadata: MediaMetadata(title: 'Apple advanced (HLS/HDR)'),
+                  ),
+                );
+              },
+              child: const Text('Play something'))
+        ],
+      ),
     );
   }
 }

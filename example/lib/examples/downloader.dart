@@ -65,87 +65,89 @@ class _DownloaderState extends State<Downloader> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Column(
-          children: [
-            BccmPlayerView(BccmPlayerController.primary),
-            ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    isOffline = !isOffline;
-                  });
-                },
-                child: Text('Offline player mode: $isOffline')),
-            ...downloads.map((state) => Row(children: [
-                  Column(children: [
-                    Text(state.download.config.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ]),
-                  state.download.status == DownloadStatus.finished
-                      ? ElevatedButton(
-                          onPressed: () {
-                            BccmPlayerController.primary.replaceCurrentMediaItem(MediaItem(
-                                url: state.download.offlineUrl,
-                                mimeType: state.download.config.mimeType,
-                                isOffline: true,
-                                metadata: MediaMetadata(title: state.download.config.title)));
-                          },
-                          child: const Text("Play"))
-                      : CircularProgressIndicator(value: state.progress),
-                  ElevatedButton(
+    return Scaffold(
+      body: ListView(
+        children: [
+          Column(
+            children: [
+              BccmPlayerView(BccmPlayerController.primary),
+              ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      isOffline = !isOffline;
+                    });
+                  },
+                  child: Text('Offline player mode: $isOffline')),
+              ...downloads.map((state) => Row(children: [
+                    Column(children: [
+                      Text(state.download.config.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ]),
+                    state.download.status == DownloadStatus.finished
+                        ? ElevatedButton(
+                            onPressed: () {
+                              BccmPlayerController.primary.replaceCurrentMediaItem(MediaItem(
+                                  url: state.download.offlineUrl,
+                                  mimeType: state.download.config.mimeType,
+                                  isOffline: true,
+                                  metadata: MediaMetadata(title: state.download.config.title)));
+                            },
+                            child: const Text("Play"))
+                        : CircularProgressIndicator(value: state.progress),
+                    ElevatedButton(
+                        onPressed: () async {
+                          await DownloaderInterface.instance.removeDownload(state.download.key);
+                          loadDownloads();
+                        },
+                        child: const Text("Remove"))
+                  ])),
+              Text(
+                  'Selected tracks: ${selectedAudioTracks.map((e) => e.labelWithFallback).join(", ")} - ${selectedVideoTracks.map((e) => e.labelWithFallback).join(", ")}'),
+              ...exampleVideos.map(
+                (mediaItem) => Column(
+                  children: [
+                    Text(mediaItem.metadata?.title ?? "Unknown"),
+                    ElevatedButton(
                       onPressed: () async {
-                        await DownloaderInterface.instance.removeDownload(state.download.key);
-                        loadDownloads();
+                        final info = await BccmPlayerInterface.instance.fetchMediaInfo(url: mediaItem.url!);
+                        if (!context.mounted) return;
+                        final selection = await showModalBottomSheet<({List<Track> audioTracks, List<Track> videoTracks})>(
+                          useRootNavigator: true,
+                          enableDrag: true,
+                          context: context,
+                          builder: (ctx) => _TrackSelection(info: info),
+                        );
+                        if (selection == null) return;
+                        setState(() {
+                          selectedAudioTracks = selection.audioTracks;
+                          selectedVideoTracks = selection.videoTracks;
+                        });
                       },
-                      child: const Text("Remove"))
-                ])),
-            Text(
-                'Selected tracks: ${selectedAudioTracks.map((e) => e.labelWithFallback).join(", ")} - ${selectedVideoTracks.map((e) => e.labelWithFallback).join(", ")}'),
-            ...exampleVideos.map(
-              (mediaItem) => Column(
-                children: [
-                  Text(mediaItem.metadata?.title ?? "Unknown"),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final info = await BccmPlayerInterface.instance.fetchMediaInfo(url: mediaItem.url!);
-                      if (!context.mounted) return;
-                      final selection = await showModalBottomSheet<({List<Track> audioTracks, List<Track> videoTracks})>(
-                        useRootNavigator: true,
-                        enableDrag: true,
-                        context: context,
-                        builder: (ctx) => _TrackSelection(info: info),
-                      );
-                      if (selection == null) return;
-                      setState(() {
-                        selectedAudioTracks = selection.audioTracks;
-                        selectedVideoTracks = selection.videoTracks;
-                      });
-                    },
-                    child: const Text('Select tracks'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final config = DownloadConfig(
-                          url: mediaItem.url!,
-                          mimeType: mediaItem.mimeType!,
-                          title: mediaItem.metadata?.title ?? "Unknown title",
-                          audioTrackIds: selectedAudioTracks.map((e) => e.id).toList(),
-                          videoTrackIds: selectedVideoTracks.map((e) => e.id).toList(),
-                          additionalData: {"test": "Coen"});
-                      final download = await DownloaderInterface.instance.startDownload(config);
-                      setState(() {
-                        downloads.add(DownloadState(download: download, progress: 0.0));
-                        downloads.sort((a, b) => a.download.key.compareTo(b.download.key));
-                      });
-                    },
-                    child: const Text('Download'),
-                  ),
-                ],
+                      child: const Text('Select tracks'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final config = DownloadConfig(
+                            url: mediaItem.url!,
+                            mimeType: mediaItem.mimeType!,
+                            title: mediaItem.metadata?.title ?? "Unknown title",
+                            audioTrackIds: selectedAudioTracks.map((e) => e.id).toList(),
+                            videoTrackIds: selectedVideoTracks.map((e) => e.id).toList(),
+                            additionalData: {"test": "Coen"});
+                        final download = await DownloaderInterface.instance.startDownload(config);
+                        setState(() {
+                          downloads.add(DownloadState(download: download, progress: 0.0));
+                          downloads.sort((a, b) => a.download.key.compareTo(b.download.key));
+                        });
+                      },
+                      child: const Text('Download'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -11,17 +11,19 @@ class NativeControls extends StatefulWidget {
 class _NativeControlsState extends State<NativeControls> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Column(
-          children: [
-            VideoPlatformView(
-              playerController: BccmPlayerController.primary,
-              showControls: true,
-            ),
-          ],
-        ),
-      ],
+    return Scaffold(
+      body: ListView(
+        children: [
+          Column(
+            children: [
+              VideoPlatformView(
+                playerController: BccmPlayerController.primary,
+                showControls: true,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

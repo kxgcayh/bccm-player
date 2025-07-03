@@ -32,29 +32,31 @@ class _SimplePlayerState extends State<SimplePlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        Column(
-          children: [
-            BccmPlayerView(playerController),
-            ElevatedButton(
-              onPressed: () {
-                playerController.setPrimary();
-              },
-              child: const Text('Make primary'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final currentMs = playerController.value.playbackPositionMs;
-                if (currentMs != null) {
-                  playerController.seekTo(Duration(milliseconds: currentMs + 20000));
-                }
-              },
-              child: const Text('Skip 20 seconds'),
-            ),
-          ],
-        ),
-      ],
+    return Scaffold(
+      body: ListView(
+        children: [
+          Column(
+            children: [
+              BccmPlayerView(playerController),
+              ElevatedButton(
+                onPressed: () {
+                  playerController.setPrimary();
+                },
+                child: const Text('Make primary'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final currentMs = playerController.value.playbackPositionMs;
+                  if (currentMs != null) {
+                    playerController.seekTo(Duration(milliseconds: currentMs + 20000));
+                  }
+                },
+                child: const Text('Skip 20 seconds'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
