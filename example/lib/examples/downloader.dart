@@ -36,23 +36,16 @@ class _DownloaderState extends State<Downloader> {
     }
     result.sort((a, b) => a.download.key.compareTo(b.download.key));
 
-    setState(() {
-      downloads = result;
-    });
+    setState(() => downloads = result);
   }
 
   @override
   void initState() {
     _subscription = DownloaderInterface.instance.events.statusChanged.listen((event) async {
-      setState(() {
-        final state = downloads.firstWhere((element) => element.download.key == event.download.key);
-        state.download = event.download;
-
-        debugPrint("Progress: ${state.progress} - ${state.download.status.name}");
-      });
+      loadDownloads();
     });
 
-    loadDownloads();
+    // loadDownloads();
 
     super.initState();
   }
